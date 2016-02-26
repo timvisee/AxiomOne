@@ -124,6 +124,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
 
             // Create a typeface with the main font, set the font afterwards
+            // TODO: Make a constant of this font name?
             Typeface font = Typeface.createFromAsset(getAssets(), "fonts/BebasNeue Bold.otf");
             mTextPaint.setTypeface(font);
 
@@ -234,10 +235,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             mTime.setToNow();
-            String text = mAmbient
-                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+//            String text = mAmbient
+//                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
+//                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
+//            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+
+            // Draw the hour
+            canvas.drawText(String.valueOf(mTime.hour), mXOffset, mYOffset, mTextPaint);
+
+            // Draw the minute
+            canvas.drawText(String.format("%02d", mTime.minute), mXOffset, mYOffset, mTextPaint);
 
             // Get the resources instance
             Resources resources = MyWatchFace.this.getResources();
