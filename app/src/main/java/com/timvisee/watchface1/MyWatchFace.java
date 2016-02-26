@@ -139,7 +139,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaint.setTypeface(font);
 
             // Set the hour and minute text painter
-            // TODO: Set the proper color and font size for both painters!
+            // TODO: Set the color of both digit painters!
             mTextPaintHour = new Paint(mTextPaint);
             mTextPaintMinute = new Paint(mTextPaint);
 
@@ -274,13 +274,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Draw the minute
             canvas.drawText(String.format("%02d", mTime.minute), mXOffset, mYOffset, mTextPaintMinute);
-
-            // Get the resources instance
-            Resources resources = MyWatchFace.this.getResources();
-
-            // Determine the position of the sample text and draw it afterwards
-            float mYOffsetText = resources.getDimension(R.dimen.digital_y_offset_text);
-            canvas.drawText("Sample Text", mXOffset, mYOffsetText, mTextPaint);
         }
 
         /**
