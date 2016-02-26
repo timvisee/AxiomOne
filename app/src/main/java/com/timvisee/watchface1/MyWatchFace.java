@@ -211,9 +211,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaint.setTextSize(textSize);
 
             // Set the font size of the hour and minute digits painter
-            // TODO: Use constants for the font size, instead of hardcoded values!
-            mTextPaintHour.setTextSize(textSize);
-            mTextPaintMinute.setTextSize(textSize / 2.0f);
+            mTextPaintHour.setTextSize(
+                    resources.getDimension(isRound
+                    ? R.dimen.hour_text_size_round : R.dimen.hour_text_size)
+            );
+            mTextPaintMinute.setTextSize(
+                    resources.getDimension(isRound
+                            ? R.dimen.minute_text_size_round : R.dimen.minute_text_size)
+            );
         }
 
         @Override
