@@ -209,6 +209,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
             mTextPaint.setTextSize(textSize);
+
+            // Set the font size of the hour and minute digits painter
+            // TODO: Use constants for the font size, instead of hardcoded values!
+            mTextPaintHour.setTextSize(textSize);
+            mTextPaintMinute.setTextSize(textSize / 2.0f);
         }
 
         @Override
@@ -230,6 +235,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
                     mTextPaint.setAntiAlias(!inAmbientMode);
+
+                    // Set the low-bit modes for the digit painters
+                    mTextPaintHour.setAntiAlias(!inAmbientMode);
+                    mTextPaintMinute.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
