@@ -8,8 +8,8 @@
 
     <dimen name="digital_y_offset_text">160dp</dimen>
 
-    <dimen name="hour_text_size">80dp</dimen>
-    <dimen name="hour_text_size_round">90dp</dimen>
-    <dimen name="minute_text_size">40dp</dimen>
-    <dimen name="minute_text_size_round">45dp</dimen>
+    <dimen name="hour_text_size">120dp</dimen>
+    <dimen name="hour_text_size_round">135dp</dimen>
+    <dimen name="minute_text_size">60dp</dimen>
+    <dimen name="minute_text_size_round">67.5dp</dimen>
 </resources>
