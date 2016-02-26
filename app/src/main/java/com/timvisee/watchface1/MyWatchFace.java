@@ -100,6 +100,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
         float mYOffset;
 
         /**
+         * The text painter for the hour digits.
+         */
+        Paint mTextPaintHour;
+
+        /**
+         * The text painter for the minute digits.
+         */
+        Paint mTextPaintMinute;
+
+        /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
          * disable anti-aliasing in ambient mode.
          */
@@ -127,6 +137,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // TODO: Make a constant of this font name?
             Typeface font = Typeface.createFromAsset(getAssets(), "fonts/BebasNeue Bold.otf");
             mTextPaint.setTypeface(font);
+
+            // Set the hour and minute text painter
+            // TODO: Set the proper color and font size for both painters!
+            mTextPaintHour = new Paint(mTextPaint);
+            mTextPaintMinute = new Paint(mTextPaint);
 
             mTime = new Time();
         }
@@ -241,10 +256,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
 //            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
 
             // Draw the hour
-            canvas.drawText(String.valueOf(mTime.hour), mXOffset, mYOffset, mTextPaint);
+            canvas.drawText(String.valueOf(mTime.hour), mXOffset, mYOffset, mTextPaintHour);
 
             // Draw the minute
-            canvas.drawText(String.format("%02d", mTime.minute), mXOffset, mYOffset, mTextPaint);
+            canvas.drawText(String.format("%02d", mTime.minute), mXOffset, mYOffset, mTextPaintMinute);
 
             // Get the resources instance
             Resources resources = MyWatchFace.this.getResources();
