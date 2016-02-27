@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.text.format.Time;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
@@ -70,13 +69,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Paint mBackgroundPaint;
         Paint mTextPaint;
         boolean mAmbient;
-        Time mTime;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                // Set the time zone
                 setTimeZoneById(intent.getStringExtra("time-zone"));
-                mTime.clear(intent.getStringExtra("time-zone"));
-                mTime.setToNow();
+
+                // Update the time
+                updateTime();
             }
         };
         float mXOffset;
@@ -152,8 +152,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Set the calendar instance
             calendar = new GregorianCalendar(TimeZone.getDefault());
-
-            mTime = new Time();
         }
 
         @Override
@@ -171,8 +169,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                 // Update time zone in case it changed while we weren't visible.
                 setTimeZone(null);
-                mTime.clear(TimeZone.getDefault().getID());
-                mTime.setToNow();
+
+                // Update the time
+                updateTime();
             } else {
                 unregisterReceiver();
             }
@@ -268,10 +267,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
             }
 
-            // Set the time
-            // TODO: Deprecate this for the calendar!
-            mTime.setToNow();
-
+            // Update the time
             updateTime();
 
             // Get the resources instance
@@ -307,7 +303,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 float radius = canvas.getWidth() / 2.0f;
                 float radiusShort = radius - 35.0f;
                 float radiusLong = radius + 5.0f;
-                float secondVal = mTime.second + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
+                float secondVal = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
                 float angle = (float) ((secondVal + 15.0f) / 60.0f * Math.PI * 2.0f);
                 float halfWidth = (float) (1.0f / 60.0f * Math.PI);
 
@@ -325,12 +321,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
             }
 
             // Draw the hour digits
-            canvas.drawText(String.valueOf(mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
-            if(mTime.hour < 10)
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            canvas.drawText(String.valueOf(hour), digitsX, hourDigitsY, mTextPaintHour);
+            if(hour < 10)
                 canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
 
             // Draw the minute
-            canvas.drawText(String.format("%02d", mTime.minute), digitsX, minuteDigitsY, mTextPaintMinute);
+            canvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
