@@ -14,8 +14,8 @@
     <dimen name="digit_x_offset">25dp</dimen>
 
     <dimen name="second_gleam_length">40dp</dimen>
-    <dimen name="tick_length_small">12dp</dimen>
-    <dimen name="tick_length_large">20dp</dimen>
+    <dimen name="tick_length_small">10dp</dimen>
+    <dimen name="tick_length_large">17.5dp</dimen>
     <dimen name="tick_width_small">1.25dp</dimen>
     <dimen name="tick_width_large">1.75dp</dimen>
 </resources>
