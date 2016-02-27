@@ -261,6 +261,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Set the time
             mTime.setToNow();
 
+            // Create a calendar instance
+            Calendar time = Calendar.getInstance();
+
             // Get the resources instance
             Resources resources = MyWatchFace.this.getResources();
 
@@ -297,8 +300,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 float radius = canvas.getWidth() / 2.0f;
                 float radiusShort = radius - 35.0f;
                 float radiusLong = radius + 5.0f;
-                Calendar testCal = Calendar.getInstance();
-                float secondVal = mTime.second + (float) (testCal.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
+                float secondVal = mTime.second + (float) (time.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
                 float angle = (float) ((secondVal + 15.0f) / 60.0f * Math.PI * 2.0f);
                 float halfWidth = (float) (1.0f / 60.0f * Math.PI);
 
