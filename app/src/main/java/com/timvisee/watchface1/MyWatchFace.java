@@ -337,6 +337,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     mGleamPaint.setAntiAlias(!inAmbientMode);
                     mTickLargePaint.setAntiAlias(!inAmbientMode);
                     mTickLargeFadedPaint.setAntiAlias(!inAmbientMode);
+                    mTickSmallPaint.setAntiAlias(!inAmbientMode);
+                    mTickSmallFadedPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
