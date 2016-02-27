@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
@@ -107,9 +106,19 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Paint mTextPaintHour;
 
         /**
+         * The text painter for the faded hour digit.
+         */
+        Paint mTextPaintHourFaded;
+
+        /**
          * The text painter for the minute digits.
          */
         Paint mTextPaintMinute;
+
+        /**
+         * The second glance painter.
+         */
+        Paint mGlancePaint;
 
         /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
@@ -141,11 +150,21 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaint.setAntiAlias(true);
 
             // Create the hour and minute text painters
-            // TODO: Set the color of both digit painters!
+            // TODO: Set the color and alpha of the font painters!
             mTextPaintHour = new Paint(mTextPaint);
             mTextPaintHour.setTextAlign(Paint.Align.RIGHT);
+            mTextPaintHourFaded = new Paint(mTextPaintHour);
+            mTextPaintHourFaded.setAlpha(255 / 10);
             mTextPaintMinute = new Paint(mTextPaint);
             mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
+
+            // Create the second glance painter
+            mGlancePaint = new Paint();
+            mGlancePaint.setColor(Color.WHITE);
+            // TODO: Set the proper alpha here, use a resource constant!
+            mGlancePaint.setAlpha(255 / 5);
+            mGlancePaint.setStyle(Paint.Style.FILL);
+            mGlancePaint.setAntiAlias(true);
 
             mTime = new Time();
         }
@@ -206,15 +225,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             mTextPaint.setTextSize(textSize);
 
+            // Determine the size of the hour and minute digits
+            float hourTextSize = resources.getDimension(isRound
+                    ? R.dimen.hour_text_size_round : R.dimen.hour_text_size);
+            float minuteTextSize = resources.getDimension(isRound
+                    ? R.dimen.minute_text_size_round : R.dimen.minute_text_size);
+
             // Set the font size of the hour and minute digits painter
-            mTextPaintHour.setTextSize(
-                    resources.getDimension(isRound
-                            ? R.dimen.hour_text_size_round : R.dimen.hour_text_size)
-            );
-            mTextPaintMinute.setTextSize(
-                    resources.getDimension(isRound
-                            ? R.dimen.minute_text_size_round : R.dimen.minute_text_size)
-            );
+            mTextPaintHour.setTextSize(hourTextSize);
+            mTextPaintHourFaded.setTextSize(hourTextSize);
+            mTextPaintMinute.setTextSize(minuteTextSize);
         }
 
         @Override
@@ -239,7 +259,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                     // Set the low-bit modes for the digit painters
                     mTextPaintHour.setAntiAlias(!inAmbientMode);
+                    mTextPaintHourFaded.setAntiAlias(!inAmbientMode);
                     mTextPaintMinute.setAntiAlias(!inAmbientMode);
+                    mGlancePaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -252,7 +274,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             // Draw the background.
-            if (isInAmbientMode()) {
+            if(isInAmbientMode()) {
                 canvas.drawColor(Color.BLACK);
             } else {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
@@ -293,14 +315,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Draw the second gleam
             if(!isInAmbientMode()) {
-                // Create the second gleam painter
-                Paint pPaint = new Paint();
-                pPaint.setColor(Color.WHITE);
-                // TODO: Set the proper alpha here, use a resource constant!
-                pPaint.setAlpha(255 / 2);
-                pPaint.setStyle(Paint.Style.FILL);
-                pPaint.setAntiAlias(true);
-
                 // Calculate some variables for the second gleam
                 float centerX = canvas.getWidth() / 2.0f;
                 float centerY = canvas.getHeight() / 2.0f;
@@ -321,16 +335,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 p.close();
 
                 // Draw the second gleam
-                canvas.drawPath(p, pPaint);
+                canvas.drawPath(p, mGlancePaint);
             }
 
             // Draw the hour digits
             canvas.drawText(String.valueOf(mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
-            if(mTime.hour < 10) {
-                Paint mTextPaintHourFaded = new Paint(mTextPaintHour);
-                mTextPaintHourFaded.setAlpha(255 / 10);
+            if(mTime.hour < 10)
                 canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
-            }
 
             // Draw the minute
             canvas.drawText(String.format("%02d", mTime.minute), digitsX, minuteDigitsY, mTextPaintMinute);
