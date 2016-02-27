@@ -140,10 +140,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaint.setColor(resources.getColor(R.color.digital_text));
             mTextPaint.setAntiAlias(true);
 
-            // Set the hour and minute text painter
+            // Create the hour and minute text painters
             // TODO: Set the color of both digit painters!
             mTextPaintHour = new Paint(mTextPaint);
+            mTextPaintHour.setTextAlign(Paint.Align.RIGHT);
             mTextPaintMinute = new Paint(mTextPaint);
+            mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
 
             mTime = new Time();
         }
@@ -269,8 +271,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Get the offset for the hour and minute digits
             float digitOffsetX = resources.getDimension(R.dimen.digit_x_offset);
 
-            mTextPaintHour.setTextAlign(Paint.Align.RIGHT);
-
             int digitsX = (canvas.getWidth() / 2) + (int) digitOffsetX;
             int hourDigitsY = (int) ((canvas.getHeight() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
 
@@ -288,13 +288,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
             Paint testPaint = new Paint(mTextPaint);
             testPaint.setColor(Color.RED);
 
-            Paint pPaint = new Paint(testPaint);
-            pPaint.setColor(Color.WHITE);
-            pPaint.setAlpha(255 / 2);
-            pPaint.setStyle(Paint.Style.FILL);
-
             // Draw the second gleam
             if(!isInAmbientMode()) {
+                // Create the second gleam painter
+                Paint pPaint = new Paint(testPaint);
+                pPaint.setColor(Color.WHITE);
+                pPaint.setAlpha(255 / 2);
+                pPaint.setStyle(Paint.Style.FILL);
+
+                // Calculate some variables for the second gleam
                 float centerX = canvas.getWidth() / 2.0f;
                 float centerY = canvas.getHeight() / 2.0f;
                 float radius = canvas.getWidth() / 2.0f;
@@ -305,6 +307,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 float angle = (float) ((secondVal + 15.0f) / 60.0f * Math.PI * 2.0f);
                 float halfWidth = (float) (1.0f / 60.0f * Math.PI);
 
+                // Create the path of the second gleam
                 Path p = new Path();
                 p.reset();
                 p.moveTo((float) (centerX + radiusShort * Math.cos(angle - halfWidth)), (float) (centerY + radiusShort * Math.sin(angle - halfWidth)));
@@ -312,12 +315,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 p.lineTo((float) (centerX + radiusLong * Math.cos(angle + halfWidth)), (float) (centerY + radiusLong * Math.sin(angle + halfWidth)));
                 p.lineTo((float) (centerX + radiusShort * Math.cos(angle + halfWidth)), (float) (centerY + radiusShort * Math.sin(angle + halfWidth)));
                 p.close();
+
+                // Draw the second gleam
                 canvas.drawPath(p, pPaint);
             }
+
             // Draw the hour
             canvas.drawText(String.format("%02d", mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
-
-            mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
 
             int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
 
