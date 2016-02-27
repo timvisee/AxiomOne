@@ -123,6 +123,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
         float hourDigitSpacing;
         float minuteDigitHeight;
         Path secondGleamPath;
+        float gleamWidth;
+        float gleamLength;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -172,6 +174,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Initialize the second glance path
             secondGleamPath = new Path();
+
+            // Determine the gleam width and height
+            gleamWidth = (float) (1.0f / 60.0f * Math.PI * 2.0f);
         }
 
         @Override
@@ -256,6 +261,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
             Rect minuteDigitBounds = new Rect();
             mTextPaintMinute.getTextBounds("0", 0, 1, minuteDigitBounds);
             minuteDigitHeight = minuteDigitBounds.height();
+
+            // Determine the second gleam length
+            gleamLength = resources.getDimension(R.dimen.second_gleam_length);
         }
 
         @Override
@@ -313,11 +321,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
             if(!isInAmbientMode()) {
                 // Calculate some variables for the second gleam
                 float radius = bounds.width() / 2.0f;
-                float radiusInside = radius - resources.getDimension(R.dimen.second_gleam_length);
-                float radiusOutside = radius + 5.0f;
+                float radiusInside = radius - gleamLength;
+                float radiusOutside = radius + 2.0f;
                 float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
                 float secondAngle = (float) ((secondPrecise - 15.0f) / 60.0f * Math.PI * 2.0f);
-                float gleamWidth = (float) (1.0f / 60.0f * Math.PI * 2.0f);
 
                 // Create the path of the second gleam
                 float[][] points = {
