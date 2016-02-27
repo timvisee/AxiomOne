@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
@@ -167,7 +166,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mGlancePaint.setStyle(Paint.Style.FILL);
             mGlancePaint.setAntiAlias(true);
 
-            // Set the time instance
             mTime = new Time();
         }
 
@@ -317,14 +315,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Draw the second gleam
             if(!isInAmbientMode()) {
-                // Create the second gleam painter
-                Paint pPaint = new Paint();
-                pPaint.setColor(Color.WHITE);
-                // TODO: Set the proper alpha here, use a resource constant!
-                pPaint.setAlpha(255 / 2);
-                pPaint.setStyle(Paint.Style.FILL);
-                pPaint.setAntiAlias(true);
-
                 // Calculate some variables for the second gleam
                 float centerX = canvas.getWidth() / 2.0f;
                 float centerY = canvas.getHeight() / 2.0f;
@@ -348,12 +338,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawPath(p, mGlancePaint);
             }
 
-            // Get the current hour
-            final int hour = time.get(Calendar.HOUR_OF_DAY);
-
             // Draw the hour digits
-            canvas.drawText(String.valueOf(hour), digitsX, hourDigitsY, mTextPaintHour);
-            if(hour < 10)
+            canvas.drawText(String.valueOf(mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
+            if(mTime.hour < 10)
                 canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
 
             // Draw the minute
