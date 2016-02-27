@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.text.format.Time;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
@@ -89,12 +88,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Paint mBackgroundPaint;
         Paint mTextPaint;
         boolean mAmbient;
-        Time mTime;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mTime.clear(intent.getStringExtra("time-zone"));
-                mTime.setToNow();
+                // Update the timezone
+                setTimeZoneId(intent.getStringExtra("time-zone"));
             }
         };
         float mXOffset;
@@ -121,6 +119,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Paint mGlancePaint;
 
         /**
+         * The current calender time.
+         */
+        Calendar time;
+
+        /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
          * disable anti-aliasing in ambient mode.
          */
@@ -140,6 +143,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
+
+            // Set the calendar instance
+            time = Calendar.getInstance();
 
             // Create a typeface with the main font, set the font afterwards
             // TODO: Make a constant of this font name?
@@ -165,8 +171,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mGlancePaint.setAlpha(255 / 5);
             mGlancePaint.setStyle(Paint.Style.FILL);
             mGlancePaint.setAntiAlias(true);
-
-            mTime = new Time();
         }
 
         @Override
@@ -182,9 +186,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
             if (visible) {
                 registerReceiver();
 
-                // Update time zone in case it changed while we weren't visible.
-                mTime.clear(TimeZone.getDefault().getID());
-                mTime.setToNow();
+                // Update time zone in case it changed while we weren't visible
+                setTimeZone(null);
             } else {
                 unregisterReceiver();
             }
@@ -280,13 +283,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
             }
 
-            // Set the time
-            // TODO: Deprecate this for the calendar!
-            mTime.setToNow();
-
-            // Create a calendar instance
-            // TODO: Create instance on create, update it once each loop!
-            Calendar time = Calendar.getInstance();
+            // Update the time
+            updateTime();
 
             // Get the resources instance
             Resources resources = MyWatchFace.this.getResources();
@@ -321,7 +319,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 float radius = canvas.getWidth() / 2.0f;
                 float radiusShort = radius - 35.0f;
                 float radiusLong = radius + 5.0f;
-                float secondVal = mTime.second + (float) (time.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
+                float secondVal = time.get(Calendar.SECOND) + (float) (time.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
                 float angle = (float) ((secondVal + 15.0f) / 60.0f * Math.PI * 2.0f);
                 float halfWidth = (float) (1.0f / 60.0f * Math.PI);
 
@@ -338,17 +336,65 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawPath(p, mGlancePaint);
             }
 
+            // Get the current hour
+            final int hour = time.get(Calendar.HOUR_OF_DAY);
+
             // Draw the hour digits
-            canvas.drawText(String.valueOf(mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
-            if(mTime.hour < 10)
+            canvas.drawText(String.valueOf(hour), digitsX, hourDigitsY, mTextPaintHour);
+            if(hour < 10)
                 canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
 
             // Draw the minute
-            canvas.drawText(String.format("%02d", mTime.minute), digitsX, minuteDigitsY, mTextPaintMinute);
+            canvas.drawText(String.format("%02d", time.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
                 invalidate();
+        }
+
+        /**
+         * Update the calendar instance with the current time.
+         */
+        public void updateTime() {
+            time.setTimeInMillis(System.currentTimeMillis());
+        }
+
+        /**
+         * Update the timezone of the calendar instance.
+         *
+         * @param tz The new timezone, or null to use the default.
+         */
+        public void setTimeZone(TimeZone tz) {
+            // Update the timezone if specified
+            if(tz != null)
+                time.setTimeZone(tz);
+
+            else
+                // Use the default timezone
+                time.setTimeZone(TimeZone.getDefault());
+        }
+
+        /**
+         * Update the timezone of the calendar instance.
+         *
+         * @param tzStr The identifier of the new timezone as a string, or null to use the default.
+         */
+        public void setTimeZoneId(String tzStr) {
+            // Set the timezone to the default if the string is null
+            if(tzStr == null) {
+                setTimeZone(null);
+                return;
+            }
+
+            // Try to determine the timezone by the string identifier
+            TimeZone tz = null;
+            try {
+                tz = TimeZone.getTimeZone(tzStr);
+
+            } catch(Exception ignored) { }
+
+            // Set the timezone
+            setTimeZone(tz);
         }
     }
 }
