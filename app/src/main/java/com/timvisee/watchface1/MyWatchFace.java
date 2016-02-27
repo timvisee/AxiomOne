@@ -90,7 +90,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         /**
          * The text painter for the faded hour digit.
          */
-        Paint mTextPaintHourFaded;
+        Paint mTextPaintHourGhost;
 
         /**
          * The text painter for the minute digits.
@@ -177,10 +177,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Create the hour and minute text painters
             // TODO: Set the color and alpha of the font painters!
             mTextPaintHour = new Paint(mTextPaint);
+            mTextPaintHour.setColor(resources.getColor(R.color.digit_hour_color));
             mTextPaintHour.setTextAlign(Paint.Align.RIGHT);
-            mTextPaintHourFaded = new Paint(mTextPaintHour);
-            mTextPaintHourFaded.setAlpha(255 / 10);
+            mTextPaintHourGhost = new Paint(mTextPaintHour);
+            mTextPaintHourGhost.setAlpha(255 / 10);
             mTextPaintMinute = new Paint(mTextPaint);
+            mTextPaintMinute.setColor(resources.getColor(R.color.digit_minute_color));
             mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
 
             // Create the second gleam painter
@@ -285,7 +287,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Set the font size of the hour and minute digits painter
             mTextPaintHour.setTextSize(hourTextSize);
-            mTextPaintHourFaded.setTextSize(hourTextSize);
+            mTextPaintHourGhost.setTextSize(hourTextSize);
             mTextPaintMinute.setTextSize(minuteTextSize);
 
             // Determine the width and height of the hour digits
@@ -332,7 +334,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                     // Set the low-bit modes for the digit painters
                     mTextPaintHour.setAntiAlias(!inAmbientMode);
-                    mTextPaintHourFaded.setAntiAlias(!inAmbientMode);
+                    mTextPaintHourGhost.setAntiAlias(!inAmbientMode);
                     mTextPaintMinute.setAntiAlias(!inAmbientMode);
                     mGleamPaint.setAntiAlias(!inAmbientMode);
                     mTickLargePaint.setAntiAlias(!inAmbientMode);
@@ -430,7 +432,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Draw the hour digits and draw a ghost digit if it's only one digit
             canvas.drawText(String.valueOf(hour), digitsX, hourDigitsY, mTextPaintHour);
             if(hour < 10)
-                canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
+                canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
 
             // Draw the minute digits
             canvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);

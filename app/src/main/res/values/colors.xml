@@ -3,10 +3,13 @@
     <color name="background">#000000</color>
     <color name="digital_text">#FFFFFF</color>
 
+    <color name="digit_hour_color">#FFFFFF</color>
+    <color name="digit_minute_color">#BABABA</color>
+
     <color name="tick_color_small">#FFFFFF</color>
     <color name="tick_color_large">#FFFFFF</color>
     <integer name="tick_alpha_small">225</integer>
-    <integer name="tick_alpha_faded_small">20</integer>
-    <integer name="tick_alpha_large">255</integer>
+    <integer name="tick_alpha_faded_small">35</integer>
+    <integer name="tick_alpha_large">225</integer>
     <integer name="tick_alpha_faded_large">35</integer>
 </resources>
