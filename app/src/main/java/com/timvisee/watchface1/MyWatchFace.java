@@ -100,7 +100,27 @@ public class MyWatchFace extends CanvasWatchFaceService {
         /**
          * The second glance painter.
          */
-        Paint mGlancePaint;
+        Paint mGleamPaint;
+
+        /**
+         * The main small tick painter.
+         */
+        Paint mTickSmallPaint;
+
+        /**
+         * The faded small tick painter.
+         */
+        Paint mTickSmallFadedPaint;
+
+        /**
+         * The main large tick painter.
+         */
+        Paint mTickLargePaint;
+
+        /**
+         * The faded large tick painter.
+         */
+        Paint mTickLargeFadedPaint;
 
         /**
          * The calendar instance that is used as time for the watch face.
@@ -125,6 +145,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Path secondGleamPath;
         float gleamWidth;
         float gleamLength;
+        float tickLengthSmall;
+        float tickLengthLarge;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -161,13 +183,27 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaintMinute = new Paint(mTextPaint);
             mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
 
-            // Create the second glance painter
-            mGlancePaint = new Paint();
-            mGlancePaint.setColor(Color.WHITE);
+            // Create the second gleam painter
+            mGleamPaint = new Paint();
+            mGleamPaint.setColor(Color.WHITE);
             // TODO: Set the proper alpha here, use a resource constant!
-            mGlancePaint.setAlpha(255 / 5);
-            mGlancePaint.setStyle(Paint.Style.FILL);
-            mGlancePaint.setAntiAlias(true);
+            mGleamPaint.setAlpha(255 / 5);
+            mGleamPaint.setStyle(Paint.Style.FILL);
+            mGleamPaint.setAntiAlias(true);
+
+            // Create the tick painters
+            mTickLargePaint = new Paint(mGleamPaint);
+            mTickLargePaint.setAlpha(255);
+            mTickLargePaint.setAntiAlias(true);
+            mTickLargePaint.setStrokeWidth(resources.getDimension(R.dimen.tick_width_large));
+            mTickLargeFadedPaint = new Paint(mTickLargePaint);
+            mTickLargeFadedPaint.setAlpha(255 / 10);
+            mTickSmallPaint = new Paint(mTickLargePaint);
+            mTickSmallPaint.setAlpha(255);
+            mTickSmallPaint.setAntiAlias(true);
+            mTickSmallPaint.setStrokeWidth(resources.getDimension(R.dimen.tick_width_small));
+            mTickSmallFadedPaint = new Paint(mTickSmallPaint);
+            mTickSmallFadedPaint.setAlpha(255 / 10);
 
             // Set the calendar instance
             calendar = new GregorianCalendar(TimeZone.getDefault());
@@ -264,6 +300,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Determine the second gleam length
             gleamLength = resources.getDimension(R.dimen.second_gleam_length);
+
+            // Determine the length of the ticks
+            tickLengthSmall = resources.getDimension(R.dimen.tick_length_small);
+            tickLengthLarge = resources.getDimension(R.dimen.tick_length_large);
         }
 
         @Override
@@ -290,7 +330,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     mTextPaintHour.setAntiAlias(!inAmbientMode);
                     mTextPaintHourFaded.setAntiAlias(!inAmbientMode);
                     mTextPaintMinute.setAntiAlias(!inAmbientMode);
-                    mGlancePaint.setAntiAlias(!inAmbientMode);
+                    mGleamPaint.setAntiAlias(!inAmbientMode);
+                    mTickLargePaint.setAntiAlias(!inAmbientMode);
+                    mTickLargeFadedPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -345,7 +387,35 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 secondGleamPath.close();
 
                 // Draw the second gleam
-                canvas.drawPath(secondGleamPath, mGlancePaint);
+                canvas.drawPath(secondGleamPath, mGleamPaint);
+
+                // Draw all ticks
+                for(int i = 0; i < 60; i++) {
+                    // Determine whether to draw a large or small tick
+                    boolean largeTick = i % 5 == 0;
+
+                    // Calculate the angle and the length of the current tick
+                    float angle = (float) ((i - 15.0f) / 60.0f * Math.PI * 2.0f);
+                    float tickLength = largeTick ? tickLengthLarge : tickLengthSmall;
+
+                    // Select the correct tick paint
+                    Paint tickPaint = largeTick ? mTickLargeFadedPaint : mTickSmallFadedPaint;
+                    if((int) (secondPrecise + 0.5f) % 60 == i)
+                        tickPaint = largeTick ? mTickLargePaint : mTickSmallPaint;
+
+                    // Calculate the coordinates of the tick to draw
+                    float[][] pointsTick = {
+                            getCircleCoords(radius - tickLength, angle, radius, radius),
+                            getCircleCoords(radius, angle, radius, radius),
+                    };
+
+                    // Draw the tick
+                    canvas.drawLine(
+                            pointsTick[0][0], pointsTick[0][1],
+                            pointsTick[1][0], pointsTick[1][1],
+                            tickPaint
+                    );
+                }
             }
 
             // Get the current hour value
