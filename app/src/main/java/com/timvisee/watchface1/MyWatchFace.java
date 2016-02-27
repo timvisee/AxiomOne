@@ -192,18 +192,22 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mGleamPaint.setAntiAlias(true);
 
             // Create the tick painters
-            mTickLargePaint = new Paint(mGleamPaint);
-            mTickLargePaint.setAlpha(255);
+            mTickLargePaint = new Paint();
+            //noinspection deprecation
+            mTickLargePaint.setColor(resources.getColor(R.color.tick_color_large));
+            mTickLargePaint.setAlpha(resources.getInteger(R.integer.tick_alpha_large));
             mTickLargePaint.setAntiAlias(true);
             mTickLargePaint.setStrokeWidth(resources.getDimension(R.dimen.tick_width_large));
             mTickLargeFadedPaint = new Paint(mTickLargePaint);
-            mTickLargeFadedPaint.setAlpha(255 / 10);
+            mTickLargeFadedPaint.setAlpha(resources.getInteger(R.integer.tick_alpha_faded_large));
             mTickSmallPaint = new Paint(mTickLargePaint);
-            mTickSmallPaint.setAlpha(255);
+            //noinspection deprecation
+            mTickSmallPaint.setColor(resources.getColor(R.color.tick_color_small));
+            mTickSmallPaint.setAlpha(resources.getInteger(R.integer.tick_alpha_small));
             mTickSmallPaint.setAntiAlias(true);
             mTickSmallPaint.setStrokeWidth(resources.getDimension(R.dimen.tick_width_small));
             mTickSmallFadedPaint = new Paint(mTickSmallPaint);
-            mTickSmallFadedPaint.setAlpha(255 / 10);
+            mTickSmallFadedPaint.setAlpha(resources.getInteger(R.integer.tick_alpha_faded_small));
 
             // Set the calendar instance
             calendar = new GregorianCalendar(TimeZone.getDefault());
