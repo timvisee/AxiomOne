@@ -45,13 +45,6 @@ import java.util.concurrent.TimeUnit;
  * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
  */
 public class MyWatchFace extends CanvasWatchFaceService {
-    private static final Typeface NORMAL_TYPEFACE = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
-
-    /**
-     * Update rate in milliseconds for interactive mode. We update once a second since seconds are
-     * displayed in interactive mode.
-     */
-    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
     /**
      * Handler message id for updating the time periodically in interactive mode.
@@ -69,18 +62,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         public EngineHandler(MyWatchFace.Engine reference) {
             mWeakReference = new WeakReference<>(reference);
         }
-
-//        @Override
-//        public void handleMessage(Message msg) {
-//            MyWatchFace.Engine engine = mWeakReference.get();
-//            if (engine != null) {
-//                switch (msg.what) {
-//                    case MSG_UPDATE_TIME:
-//                        engine.handleUpdateTimeMessage();
-//                        break;
-//                }
-//            }
-//        }
     }
 
     private class Engine extends CanvasWatchFaceService.Engine {
