@@ -439,18 +439,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
          *
          * @param radius The radius.
          * @param angle The angle.
-         *
-         * @return The coordinates.
-         */
-        public float[] getCircleCoords(float radius, float angle) {
-            return getCircleCoords(radius, angle, 0.0f, 0.0f);
-        }
-
-        /**
-         * Calculate the coordinates in a circle for the given radius and angle.
-         *
-         * @param radius The radius.
-         * @param angle The angle.
          * @param offsetX The X offset.
          * @param offsetY The Y offset.
          *
