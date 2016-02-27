@@ -12,4 +12,6 @@
     <dimen name="minute_text_size_round">67.5dp</dimen>
 
     <dimen name="digit_x_offset">25dp</dimen>
+
+    <dimen name="second_gleam_length">40dp</dimen>
 </resources>

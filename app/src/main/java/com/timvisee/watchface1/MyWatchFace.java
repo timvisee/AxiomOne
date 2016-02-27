@@ -108,10 +108,21 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Calendar calendar;
 
         /**
+         * Resources instance.
+         */
+        Resources resources;
+
+        /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
          * disable anti-aliasing in ambient mode.
          */
         boolean mLowBitAmbient;
+
+        float hourDigitHeight;
+        float hourDigitWidth;
+        float hourDigitSpacing;
+        float minuteDigitHeight;
+        Path secondGlancePath;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -122,7 +133,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .build());
-            Resources resources = MyWatchFace.this.getResources();
+
+            // Set the resources instance
+            resources = MyWatchFace.this.getResources();
+
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
 
             mBackgroundPaint = new Paint();
@@ -155,6 +169,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Set the calendar instance
             calendar = new GregorianCalendar(TimeZone.getDefault());
+
+            // Initialize the second glance path
+            secondGlancePath = new Path();
         }
 
         @Override
@@ -225,6 +242,20 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaintHour.setTextSize(hourTextSize);
             mTextPaintHourFaded.setTextSize(hourTextSize);
             mTextPaintMinute.setTextSize(minuteTextSize);
+
+            // Determine the width and height of the hour digits
+            Rect hourDigitBounds = new Rect();
+            Rect hourDigitBoundsDouble = new Rect();
+            mTextPaintHour.getTextBounds("0", 0, 1, hourDigitBounds);
+            mTextPaintHour.getTextBounds("00", 0, 2, hourDigitBoundsDouble);
+            hourDigitHeight = hourDigitBounds.height();
+            hourDigitWidth = hourDigitBounds.width();
+            hourDigitSpacing = hourDigitBoundsDouble.width() - hourDigitWidth * 2;
+
+            // Determine the height of the minute digits
+            Rect minuteDigitBounds = new Rect();
+            mTextPaintMinute.getTextBounds("0", 0, 1, minuteDigitBounds);
+            minuteDigitHeight = minuteDigitBounds.height();
         }
 
         @Override
@@ -273,68 +304,86 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Update the time
             updateTime();
 
-            // Get the resources instance
-            Resources resources = MyWatchFace.this.getResources();
-
             // Get the offset for the hour and minute digits
-            float digitOffsetX = resources.getDimension(R.dimen.digit_x_offset);
-
-            int digitsX = (canvas.getWidth() / 2) + (int) digitOffsetX;
-            int hourDigitsY = (int) ((canvas.getHeight() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
-
-            // Determine the height of the hour digits
-            Rect hourDigitBounds = new Rect();
-            Rect hourDigitBoundsDouble = new Rect();
-            mTextPaintHour.getTextBounds("0", 0, 1, hourDigitBounds);
-            mTextPaintHour.getTextBounds("00", 0, 2, hourDigitBoundsDouble);
-            float hourDigitHeight = hourDigitBounds.height();
-            float hourDigitWidth = hourDigitBounds.width();
-            float hourDigitSpacing = hourDigitBoundsDouble.width() - hourDigitWidth * 2;
-
-            // Determine the height of the minute digits
-            Rect minuteDigitBounds = new Rect();
-            mTextPaintMinute.getTextBounds("0", 0, 1, minuteDigitBounds);
-            float minuteDigitHeight = minuteDigitBounds.height();
-
+            int digitsX = (bounds.width() / 2) + (int) resources.getDimension(R.dimen.digit_x_offset);
+            int hourDigitsY = (int) ((bounds.height() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
             int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
 
             // Draw the second gleam
             if(!isInAmbientMode()) {
                 // Calculate some variables for the second gleam
-                float centerX = canvas.getWidth() / 2.0f;
-                float centerY = canvas.getHeight() / 2.0f;
-                float radius = canvas.getWidth() / 2.0f;
-                float radiusShort = radius - 35.0f;
-                float radiusLong = radius + 5.0f;
-                float secondVal = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
-                float angle = (float) ((secondVal - 15.0f) / 60.0f * Math.PI * 2.0f);
-                float halfWidth = (float) (1.0f / 60.0f * Math.PI);
+                float radius = bounds.width() / 2.0f;
+                float radiusInside = radius - resources.getDimension(R.dimen.second_gleam_length);
+                float radiusOutside = radius + 5.0f;
+                float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
+                float secondAngle = (float) ((secondPrecise - 15.0f) / 60.0f * Math.PI * 2.0f);
+                float gleamWidth = (float) (1.0f / 60.0f * Math.PI * 2.0f);
 
                 // Create the path of the second gleam
-                Path p = new Path();
-                p.reset();
-                p.moveTo((float) (centerX + radiusShort * Math.cos(angle - halfWidth)), (float) (centerY + radiusShort * Math.sin(angle - halfWidth)));
-                p.lineTo((float) (centerX + radiusLong * Math.cos(angle - halfWidth)), (float) (centerY + radiusLong * Math.sin(angle - halfWidth)));
-                p.lineTo((float) (centerX + radiusLong * Math.cos(angle + halfWidth)), (float) (centerY + radiusLong * Math.sin(angle + halfWidth)));
-                p.lineTo((float) (centerX + radiusShort * Math.cos(angle + halfWidth)), (float) (centerY + radiusShort * Math.sin(angle + halfWidth)));
-                p.close();
+                float[][] points = {
+                        getCircleCoords(radiusInside, secondAngle - gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusOutside, secondAngle - gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusOutside, secondAngle + gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusInside, secondAngle + gleamWidth / 2.0f, radius, radius),
+                };
+
+                // Reset the current path
+                secondGlancePath.reset();
+
+                // Draw the second glance path
+                secondGlancePath.moveTo(points[0][0], points[0][1]);
+                secondGlancePath.lineTo(points[1][0], points[1][1]);
+                secondGlancePath.lineTo(points[2][0], points[2][1]);
+                secondGlancePath.lineTo(points[3][0], points[3][1]);
+                secondGlancePath.close();
 
                 // Draw the second gleam
-                canvas.drawPath(p, mGlancePaint);
+                canvas.drawPath(secondGlancePath, mGlancePaint);
             }
 
-            // Draw the hour digits
+            // Get the current hour value
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+            // Draw the hour digits and draw a ghost digit if it's only one digit
             canvas.drawText(String.valueOf(hour), digitsX, hourDigitsY, mTextPaintHour);
             if(hour < 10)
                 canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
 
-            // Draw the minute
+            // Draw the minute digits
             canvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
                 invalidate();
+        }
+
+        /**
+         * Calculate the coordinates in a circle for the given radius and angle.
+         *
+         * @param radius The radius.
+         * @param angle The angle.
+         *
+         * @return The coordinates.
+         */
+        public float[] getCircleCoords(float radius, float angle) {
+            return getCircleCoords(radius, angle, 0.0f, 0.0f);
+        }
+
+        /**
+         * Calculate the coordinates in a circle for the given radius and angle.
+         *
+         * @param radius The radius.
+         * @param angle The angle.
+         * @param offsetX The X offset.
+         * @param offsetY The Y offset.
+         *
+         * @return The coordinates.
+         */
+        public float[] getCircleCoords(float radius, float angle, float offsetX, float offsetY) {
+            return new float[] {
+                    (float) (radius * Math.cos(angle)) + offsetX,
+                    (float) (radius * Math.sin(angle)) + offsetY
+            };
         }
 
         /**
