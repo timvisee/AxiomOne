@@ -37,8 +37,8 @@ import android.view.WindowInsets;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
@@ -74,6 +74,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                setTimeZoneById(intent.getStringExtra("time-zone"));
                 mTime.clear(intent.getStringExtra("time-zone"));
                 mTime.setToNow();
             }
@@ -100,6 +101,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
          * The second glance painter.
          */
         Paint mGlancePaint;
+
+        Calendar calendar;
 
         /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
@@ -147,6 +150,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mGlancePaint.setStyle(Paint.Style.FILL);
             mGlancePaint.setAntiAlias(true);
 
+            // Set the calendar instance
+            calendar = new GregorianCalendar(TimeZone.getDefault());
+
             mTime = new Time();
         }
 
@@ -164,6 +170,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 registerReceiver();
 
                 // Update time zone in case it changed while we weren't visible.
+                setTimeZone(null);
                 mTime.clear(TimeZone.getDefault().getID());
                 mTime.setToNow();
             } else {
@@ -330,6 +337,26 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
                 invalidate();
+        }
+
+        public void setTimeZone(TimeZone timeZone) {
+            // Set the default timezone
+            if(timeZone == null)
+                calendar.setTimeZone(TimeZone.getDefault());
+
+            else
+                // Set the given timezone
+                calendar.setTimeZone(timeZone);
+        }
+
+        public void setTimeZoneById(String timeZoneId) {
+            // If the timezone ID is null, set it to the default
+            if(timeZoneId == null) {
+                setTimeZone(null);
+                return;
+            }
+
+            // FIXME: Determine the time zone, and set it afterwards!
         }
     }
 }
