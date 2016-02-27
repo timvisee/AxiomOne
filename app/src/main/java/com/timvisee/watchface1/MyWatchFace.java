@@ -272,6 +272,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // TODO: Deprecate this for the calendar!
             mTime.setToNow();
 
+            updateTime();
+
             // Get the resources instance
             Resources resources = MyWatchFace.this.getResources();
 
@@ -335,6 +337,19 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 invalidate();
         }
 
+        /**
+         * Update the current time stored in the calendar instance.
+         * This method must be called to properly update the millis field in the calendar.
+         */
+        public void updateTime() {
+            calendar.setTimeInMillis(System.currentTimeMillis());
+        }
+
+        /**
+         * Set the timezone of the calendar instance.
+         *
+         * @param timeZone The time zone, or null to use the default time zone.
+         */
         public void setTimeZone(TimeZone timeZone) {
             // Set the default timezone
             if(timeZone == null)
@@ -345,6 +360,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 calendar.setTimeZone(timeZone);
         }
 
+        /**
+         * Set the timezone of the calendar instance by it's ID.
+         *
+         * @param timeZoneId The time zone ID, or null to use the default time zone.
+         */
         public void setTimeZoneById(String timeZoneId) {
             // If the timezone ID is null, set it to the default
             if(timeZoneId == null) {
