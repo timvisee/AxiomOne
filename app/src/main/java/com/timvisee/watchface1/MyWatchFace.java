@@ -263,6 +263,67 @@ public class MyWatchFace extends CanvasWatchFaceService {
 //                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
 //            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
 
+            // Get the resources instance
+            Resources resources = MyWatchFace.this.getResources();
+
+            // Get the offset for the hour and minute digits
+            float digitOffsetX = resources.getDimension(R.dimen.digit_x_offset);
+
+            mTextPaintHour.setTextAlign(Paint.Align.RIGHT);
+
+            int digitsX = (canvas.getWidth() / 2) + (int) digitOffsetX;
+            int hourDigitsY = (int) ((canvas.getHeight() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
+
+            // Determine the height of the hour digits
+            Rect hourDigitBounds = new Rect();
+            mTextPaintHour.getTextBounds("0", 0, 1, hourDigitBounds);
+            float hourDigitHeight = hourDigitBounds.height();
+
+            // Determine the height of the minute digits
+            Rect minuteDigitBounds = new Rect();
+            mTextPaintMinute.getTextBounds("0", 0, 1, minuteDigitBounds);
+            float minuteDigitHeight = minuteDigitBounds.height();
+
+            // Create a test paint
+            Paint testPaint = new Paint(mTextPaint);
+            testPaint.setColor(Color.RED);
+
+            Paint pPaint = new Paint(testPaint);
+            pPaint.setColor(Color.WHITE);
+            pPaint.setAlpha(255 / 2);
+            pPaint.setStyle(Paint.Style.FILL);
+
+            // Draw the second gleam
+            if(!isInAmbientMode()) {
+                float centerX = canvas.getWidth() / 2.0f;
+                float centerY = canvas.getHeight() / 2.0f;
+                float radius = canvas.getWidth() / 2.0f;
+                float radiusShort = radius - 35.0f;
+                float radiusLong = radius + 5.0f;
+                Calendar testCal = Calendar.getInstance();
+                float secondVal = mTime.second + (float) (testCal.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
+                float angle = (float) ((secondVal + 15.0f) / 60.0f * Math.PI * 2.0f);
+                float halfWidth = (float) (1.0f / 60.0f * Math.PI);
+
+                Path p = new Path();
+                p.reset();
+                p.moveTo((float) (centerX + radiusShort * Math.cos(angle - halfWidth)), (float) (centerY + radiusShort * Math.sin(angle - halfWidth)));
+                p.lineTo((float) (centerX + radiusLong * Math.cos(angle - halfWidth)), (float) (centerY + radiusLong * Math.sin(angle - halfWidth)));
+                p.lineTo((float) (centerX + radiusLong * Math.cos(angle + halfWidth)), (float) (centerY + radiusLong * Math.sin(angle + halfWidth)));
+                p.lineTo((float) (centerX + radiusShort * Math.cos(angle + halfWidth)), (float) (centerY + radiusShort * Math.sin(angle + halfWidth)));
+                p.close();
+                canvas.drawPath(p, pPaint);
+            }
+            // Draw the hour
+            canvas.drawText(String.format("%02d", mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
+
+            mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
+
+            int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
+
+            // Draw the minute
+            canvas.drawText(String.format("%02d", mTime.minute), digitsX, minuteDigitsY, mTextPaintMinute);
+
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
                 invalidate();
