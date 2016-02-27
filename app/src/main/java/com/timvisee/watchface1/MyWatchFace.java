@@ -122,7 +122,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         float hourDigitWidth;
         float hourDigitSpacing;
         float minuteDigitHeight;
-        Path secondGlancePath;
+        Path secondGleamPath;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -171,7 +171,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             calendar = new GregorianCalendar(TimeZone.getDefault());
 
             // Initialize the second glance path
-            secondGlancePath = new Path();
+            secondGleamPath = new Path();
         }
 
         @Override
@@ -328,17 +328,17 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 };
 
                 // Reset the current path
-                secondGlancePath.reset();
+                secondGleamPath.reset();
 
                 // Draw the second glance path
-                secondGlancePath.moveTo(points[0][0], points[0][1]);
-                secondGlancePath.lineTo(points[1][0], points[1][1]);
-                secondGlancePath.lineTo(points[2][0], points[2][1]);
-                secondGlancePath.lineTo(points[3][0], points[3][1]);
-                secondGlancePath.close();
+                secondGleamPath.moveTo(points[0][0], points[0][1]);
+                secondGleamPath.lineTo(points[1][0], points[1][1]);
+                secondGleamPath.lineTo(points[2][0], points[2][1]);
+                secondGleamPath.lineTo(points[3][0], points[3][1]);
+                secondGleamPath.close();
 
                 // Draw the second gleam
-                canvas.drawPath(secondGlancePath, mGlancePaint);
+                canvas.drawPath(secondGleamPath, mGlancePaint);
             }
 
             // Get the current hour value
