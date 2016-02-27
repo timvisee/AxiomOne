@@ -277,9 +277,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Determine the height of the hour digits
             Rect hourDigitBounds = new Rect();
+            Rect hourDigitBoundsDouble = new Rect();
             mTextPaintHour.getTextBounds("0", 0, 1, hourDigitBounds);
+            mTextPaintHour.getTextBounds("00", 0, 2, hourDigitBoundsDouble);
             float hourDigitHeight = hourDigitBounds.height();
             float hourDigitWidth = hourDigitBounds.width();
+            float hourDigitSpacing = hourDigitBoundsDouble.width() - hourDigitWidth * 2;
 
             // Determine the height of the minute digits
             Rect minuteDigitBounds = new Rect();
@@ -321,8 +324,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawPath(p, pPaint);
             }
 
-            // Draw the hour
-            canvas.drawText(String.format("%02d", mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
+            // Draw the hour digits
+            canvas.drawText(String.valueOf(mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
+            if(mTime.hour < 10) {
+                Paint mTextPaintHourFaded = new Paint(mTextPaintHour);
+                mTextPaintHourFaded.setAlpha(255 / 10);
+                canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourFaded);
+            }
 
             // Draw the minute
             canvas.drawText(String.format("%02d", mTime.minute), digitsX, minuteDigitsY, mTextPaintMinute);
