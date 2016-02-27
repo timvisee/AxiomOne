@@ -133,6 +133,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Resources resources;
 
         /**
+         * The background color.
+         */
+        int backgroundColor;
+
+        /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
          * disable anti-aliasing in ambient mode.
          */
@@ -163,8 +168,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
 
-            mBackgroundPaint = new Paint();
-            mBackgroundPaint.setColor(resources.getColor(R.color.background));
+            // Get the background color
+            backgroundColor = resources.getColor(R.color.background);
 
             // Create a typeface with the main font, set the font afterwards
             // TODO: Make a constant of this font name?
@@ -353,11 +358,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             // Draw the background.
-            if(isInAmbientMode()) {
-                canvas.drawColor(Color.BLACK);
-            } else {
-                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
-            }
+            canvas.drawColor(!isInAmbientMode() ? backgroundColor : Color.BLACK);
 
             // Update the time
             updateTime();
