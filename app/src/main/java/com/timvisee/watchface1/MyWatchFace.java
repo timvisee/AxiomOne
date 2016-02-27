@@ -259,9 +259,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
             }
 
             // Set the time
+            // TODO: Deprecate this for the calendar!
             mTime.setToNow();
 
             // Create a calendar instance
+            // TODO: Create instance on create, update it once each loop!
             Calendar time = Calendar.getInstance();
 
             // Get the resources instance
@@ -277,6 +279,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             Rect hourDigitBounds = new Rect();
             mTextPaintHour.getTextBounds("0", 0, 1, hourDigitBounds);
             float hourDigitHeight = hourDigitBounds.height();
+            float hourDigitWidth = hourDigitBounds.width();
 
             // Determine the height of the minute digits
             Rect minuteDigitBounds = new Rect();
@@ -293,6 +296,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 // TODO: Set the proper alpha here, use a resource constant!
                 pPaint.setAlpha(255 / 2);
                 pPaint.setStyle(Paint.Style.FILL);
+                pPaint.setAntiAlias(true);
 
                 // Calculate some variables for the second gleam
                 float centerX = canvas.getWidth() / 2.0f;
