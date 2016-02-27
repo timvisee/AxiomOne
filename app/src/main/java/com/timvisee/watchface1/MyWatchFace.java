@@ -258,12 +258,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
             }
 
-            // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
+            // Set the time
             mTime.setToNow();
-//            String text = mAmbient
-//                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-//                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
-//            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
 
             // Get the resources instance
             Resources resources = MyWatchFace.this.getResources();
@@ -284,15 +280,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaintMinute.getTextBounds("0", 0, 1, minuteDigitBounds);
             float minuteDigitHeight = minuteDigitBounds.height();
 
-            // Create a test paint
-            Paint testPaint = new Paint(mTextPaint);
-            testPaint.setColor(Color.RED);
+            int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
 
             // Draw the second gleam
             if(!isInAmbientMode()) {
                 // Create the second gleam painter
-                Paint pPaint = new Paint(testPaint);
+                Paint pPaint = new Paint();
                 pPaint.setColor(Color.WHITE);
+                // TODO: Set the proper alpha here, use a resource constant!
                 pPaint.setAlpha(255 / 2);
                 pPaint.setStyle(Paint.Style.FILL);
 
@@ -322,8 +317,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Draw the hour
             canvas.drawText(String.format("%02d", mTime.hour), digitsX, hourDigitsY, mTextPaintHour);
-
-            int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
 
             // Draw the minute
             canvas.drawText(String.format("%02d", mTime.minute), digitsX, minuteDigitsY, mTextPaintMinute);
