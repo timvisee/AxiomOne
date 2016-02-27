@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
 import java.lang.ref.WeakReference;
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -69,17 +71,17 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mWeakReference = new WeakReference<>(reference);
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            MyWatchFace.Engine engine = mWeakReference.get();
-            if (engine != null) {
-                switch (msg.what) {
-                    case MSG_UPDATE_TIME:
-                        engine.handleUpdateTimeMessage();
-                        break;
-                }
-            }
-        }
+//        @Override
+//        public void handleMessage(Message msg) {
+//            MyWatchFace.Engine engine = mWeakReference.get();
+//            if (engine != null) {
+//                switch (msg.what) {
+//                    case MSG_UPDATE_TIME:
+//                        engine.handleUpdateTimeMessage();
+//                        break;
+//                }
+//            }
+//        }
     }
 
     private class Engine extends CanvasWatchFaceService.Engine {
@@ -130,13 +132,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
-            mTextPaint = new Paint();
-            mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
-
             // Create a typeface with the main font, set the font afterwards
             // TODO: Make a constant of this font name?
             Typeface font = Typeface.createFromAsset(getAssets(), "fonts/BebasNeue Bold.otf");
+            mTextPaint = new Paint();
             mTextPaint.setTypeface(font);
+            mTextPaint.setColor(resources.getColor(R.color.digital_text));
+            mTextPaint.setAntiAlias(true);
 
             // Set the hour and minute text painter
             // TODO: Set the color of both digit painters!
@@ -150,14 +152,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
             super.onDestroy();
-        }
-
-        private Paint createTextPaint(int textColor) {
-            Paint paint = new Paint();
-            paint.setColor(textColor);
-            paint.setTypeface(NORMAL_TYPEFACE);
-            paint.setAntiAlias(true);
-            return paint;
         }
 
         @Override
@@ -174,9 +168,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 unregisterReceiver();
             }
 
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
-            updateTimer();
+            // Invalidate the face for smooth animations if it's visible and not in ambient mode
+            if(isVisible() && !isInAmbientMode())
+                invalidate();
         }
 
         private void registerReceiver() {
@@ -213,7 +207,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Set the font size of the hour and minute digits painter
             mTextPaintHour.setTextSize(
                     resources.getDimension(isRound
-                    ? R.dimen.hour_text_size_round : R.dimen.hour_text_size)
+                            ? R.dimen.hour_text_size_round : R.dimen.hour_text_size)
             );
             mTextPaintMinute.setTextSize(
                     resources.getDimension(isRound
@@ -248,9 +242,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 invalidate();
             }
 
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
-            updateTimer();
+            // Invalidate the face for smooth animations if it's visible and not in ambient mode
+            if(isVisible() && !isInAmbientMode())
+                invalidate();
         }
 
         @Override
@@ -269,43 +263,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 //                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
 //            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
 
-            // Draw the hour
-            canvas.drawText(String.valueOf(mTime.hour), mXOffset, mYOffset, mTextPaintHour);
-
-            // Draw the minute
-            canvas.drawText(String.format("%02d", mTime.minute), mXOffset, mYOffset, mTextPaintMinute);
-        }
-
-        /**
-         * Starts the {@link #mUpdateTimeHandler} timer if it should be running and isn't currently
-         * or stops it if it shouldn't be running but currently is.
-         */
-        private void updateTimer() {
-            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
-            if (shouldTimerBeRunning()) {
-                mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
-            }
-        }
-
-        /**
-         * Returns whether the {@link #mUpdateTimeHandler} timer should be running. The timer should
-         * only run when we're visible and in interactive mode.
-         */
-        private boolean shouldTimerBeRunning() {
-            return isVisible() && !isInAmbientMode();
-        }
-
-        /**
-         * Handle updating the time periodically in interactive mode.
-         */
-        private void handleUpdateTimeMessage() {
-            invalidate();
-            if (shouldTimerBeRunning()) {
-                long timeMs = System.currentTimeMillis();
-                long delayMs = INTERACTIVE_UPDATE_RATE_MS
-                        - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
-                mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
-            }
+            // Invalidate the face for smooth animations if it's visible and not in ambient mode
+            if(isVisible() && !isInAmbientMode())
+                invalidate();
         }
     }
 }
