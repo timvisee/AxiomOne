@@ -225,11 +225,6 @@ public class AxiomOneFace extends CanvasWatchFaceService {
         }
 
         @Override
-        public void onDestroy() {
-            super.onDestroy();
-        }
-
-        @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
