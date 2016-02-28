@@ -138,6 +138,11 @@ public class AxiomOneFace extends CanvasWatchFaceService {
         Date clockBitmapLastUpdate;
 
         /**
+         * True to force-update the clock bitmap the next time the watch face is rendered.
+         */
+        boolean clockBitmapForceUpdate = false;
+
+        /**
          * The bitmap the second ticks are drawn in.
          * This is only updated when the tick visuals change.
          */
@@ -228,7 +233,7 @@ public class AxiomOneFace extends CanvasWatchFaceService {
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
-            if (visible) {
+            if(visible) {
                 registerReceiver();
 
                 // Update time zone in case it changed while we weren't visible.
@@ -239,6 +244,9 @@ public class AxiomOneFace extends CanvasWatchFaceService {
             } else {
                 unregisterReceiver();
             }
+
+            // Force update the clock bitmap the next time the watch face is rendered
+            clockBitmapForceUpdate = true;
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
@@ -337,6 +345,11 @@ public class AxiomOneFace extends CanvasWatchFaceService {
                     mTickSmallPaint.setAntiAlias(!inAmbientMode);
                     mTickSmallFadedPaint.setAntiAlias(!inAmbientMode);
                 }
+
+                // Force update the clock bitmap the next time the watch face is rendered
+                clockBitmapForceUpdate = true;
+
+                // Invalidate the frame
                 invalidate();
             }
 
@@ -363,6 +376,7 @@ public class AxiomOneFace extends CanvasWatchFaceService {
             // Draw the clock bitmap if it isn't up-to-date
             // TODO: Also force-update this when the screen goes to ambient mode!
             if(clockBitmapLastUpdate == null
+                    || clockBitmapForceUpdate
                     || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
                     || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
                 // Get the offset for the hour and minute digits
@@ -481,6 +495,9 @@ public class AxiomOneFace extends CanvasWatchFaceService {
             // Draw and render the clock bitmap
             if(isVisible() && !isInAmbientMode())
                 canvas.drawBitmap(ticksBitmap, 0, 0, null);
+
+            // Reset the clock bitmap force redraw flag
+            clockBitmapForceUpdate = false;
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
