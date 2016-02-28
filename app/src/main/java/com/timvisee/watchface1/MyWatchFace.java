@@ -159,6 +159,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Bitmap clockBitmap;
         Date clockBitmapLastUpdate;
 
+        Bitmap ticksBitmap;
+        Date ticksBitmapLastUpdate;
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -375,35 +378,55 @@ public class MyWatchFace extends CanvasWatchFaceService {
             int hourDigitsY = (int) ((bounds.height() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
             int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
 
-            // Draw the second gleam
-            if(!isInAmbientMode()) {
-                // Calculate some variables for the second gleam
-                float radius = bounds.width() / 2.0f;
-                float radiusInside = radius - gleamLength;
-                float radiusOutside = radius + 2.0f;
-                float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
-                float secondAngle = (float) ((secondPrecise - 15.0f) / 60.0f * Math.PI * 2.0f);
+            float radius = bounds.width() / 2.0f;
+            float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
 
-                // Create the path of the second gleam
-                float[][] points = {
-                        getCircleCoords(radiusInside, secondAngle - gleamWidth / 2.0f, radius, radius),
-                        getCircleCoords(radiusOutside, secondAngle - gleamWidth / 2.0f, radius, radius),
-                        getCircleCoords(radiusOutside, secondAngle + gleamWidth / 2.0f, radius, radius),
-                        getCircleCoords(radiusInside, secondAngle + gleamWidth / 2.0f, radius, radius),
-                };
+            // Create the clock bitmap if it hasn't been initialized yet
+            if(clockBitmap == null)
+                clockBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
 
-                // Reset the current path
-                secondGleamPath.reset();
+            // Create the ticks bitmap if it hasn't been initialized yet
+            if(ticksBitmap == null)
+                ticksBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
 
-                // Draw the second glance path
-                secondGleamPath.moveTo(points[0][0], points[0][1]);
-                secondGleamPath.lineTo(points[1][0], points[1][1]);
-                secondGleamPath.lineTo(points[2][0], points[2][1]);
-                secondGleamPath.lineTo(points[3][0], points[3][1]);
-                secondGleamPath.close();
+            // Draw the clock bitmap if it isn't up-to-date
+            if(clockBitmapLastUpdate == null
+                    || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
+                    || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
+                // Update the last bitmap update time
+                clockBitmapLastUpdate = calendar.getTime();
 
-                // Draw the second gleam
-                canvas.drawPath(secondGleamPath, mGleamPaint);
+                // Show a debug message
+                System.out.println("Redrawing clock bitmap");
+
+                // Create a new canvas to draw in
+                Canvas clockCanvas = new Canvas(clockBitmap);
+
+                // Clear the current bitmap (transparent)
+                clockCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+                // Draw the hour digits and draw a ghost digit if it's only one digit
+                clockCanvas.drawText(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), digitsX, hourDigitsY, mTextPaintHour);
+                if(calendar.get(Calendar.HOUR_OF_DAY) < 10)
+                    clockCanvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
+
+                // Draw the minute digits
+                clockCanvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
+            }
+
+            // Draw the clock bitmap if it isn't up-to-date
+            if(isVisible() && !isInAmbientMode() && (ticksBitmapLastUpdate == null || ticksBitmapLastUpdate.getSeconds() != calendar.get(Calendar.SECOND))) {
+                // Update the last bitmap update time
+                ticksBitmapLastUpdate = calendar.getTime();
+
+                // Show a debug message
+                System.out.println("Redrawing ticks bitmap");
+
+                // Create a new canvas to draw in
+                Canvas ticksCanvas = new Canvas(ticksBitmap);
+
+                // Clear the current bitmap (transparent)
+                ticksCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
                 // Draw all ticks
                 for(int i = 0; i < 60; i++) {
@@ -426,7 +449,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     };
 
                     // Draw the tick
-                    canvas.drawLine(
+                    ticksCanvas.drawLine(
                             pointsTick[0][0], pointsTick[0][1],
                             pointsTick[1][0], pointsTick[1][1],
                             tickPaint
@@ -434,37 +457,41 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 }
             }
 
-            // Create the clock bitmap if it hasn't been initialized yet
-            if(clockBitmap == null)
-                clockBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+            // Draw the second gleam
+            if(isVisible() && !isInAmbientMode()) {
+                // Calculate some variables for the second gleam
+                float radiusInside = radius - gleamLength;
+                float radiusOutside = radius + 2.0f;
+                float secondAngle = (float) ((secondPrecise - 15.0f) / 60.0f * Math.PI * 2.0f);
 
-            // Draw the clock bitmap if it isn't up-to-date
-            if(clockBitmapLastUpdate == null
-                    || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
-                    || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
-                // Update the last bitmap update time
-                clockBitmapLastUpdate = calendar.getTime();
+                // Create the path of the second gleam
+                float[][] points = {
+                        getCircleCoords(radiusInside, secondAngle - gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusOutside, secondAngle - gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusOutside, secondAngle + gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusInside, secondAngle + gleamWidth / 2.0f, radius, radius),
+                };
 
-                // Show a debug message
-                System.out.println("Drawing clock bitmap");
+                // Reset the current path
+                secondGleamPath.reset();
 
-                // Create a new canvas to draw in
-                Canvas clockCanvas = new Canvas(clockBitmap);
+                // Draw the second glance path
+                secondGleamPath.moveTo(points[0][0], points[0][1]);
+                secondGleamPath.lineTo(points[1][0], points[1][1]);
+                secondGleamPath.lineTo(points[2][0], points[2][1]);
+                secondGleamPath.lineTo(points[3][0], points[3][1]);
+                secondGleamPath.close();
 
-                // Clear the current bitmap
-                clockCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-
-                // Draw the hour digits and draw a ghost digit if it's only one digit
-                clockCanvas.drawText(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), digitsX, hourDigitsY, mTextPaintHour);
-                if(calendar.get(Calendar.HOUR_OF_DAY) < 10)
-                    clockCanvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
-
-                // Draw the minute digits
-                clockCanvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
+                // Draw the second gleam
+                canvas.drawPath(secondGleamPath, mGleamPaint);
             }
 
             // Draw and render the clock bitmap
             canvas.drawBitmap(clockBitmap, 0, 0, null);
+
+            // Draw and render the clock bitmap
+            if(isVisible() && !isInAmbientMode())
+                canvas.drawBitmap(ticksBitmap, 0, 0, null);
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
