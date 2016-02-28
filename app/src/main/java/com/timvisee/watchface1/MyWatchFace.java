@@ -21,10 +21,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -36,6 +38,7 @@ import android.view.WindowInsets;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -152,6 +155,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
         float gleamLength;
         float tickLengthSmall;
         float tickLengthLarge;
+
+        Bitmap clockBitmap;
+        Date clockBitmapLastUpdate;
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -427,16 +434,37 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 }
             }
 
-            // Get the current hour value
-            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            // Create the clock bitmap if it hasn't been initialized yet
+            if(clockBitmap == null)
+                clockBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
 
-            // Draw the hour digits and draw a ghost digit if it's only one digit
-            canvas.drawText(String.valueOf(hour), digitsX, hourDigitsY, mTextPaintHour);
-            if(hour < 10)
-                canvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
+            // Draw the clock bitmap if it isn't up-to-date
+            if(clockBitmapLastUpdate == null
+                    || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
+                    || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
+                // Update the last bitmap update time
+                clockBitmapLastUpdate = calendar.getTime();
 
-            // Draw the minute digits
-            canvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
+                // Show a debug message
+                System.out.println("Drawing clock bitmap");
+
+                // Create a new canvas to draw in
+                Canvas clockCanvas = new Canvas(clockBitmap);
+
+                // Clear the current bitmap
+                clockCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+                // Draw the hour digits and draw a ghost digit if it's only one digit
+                clockCanvas.drawText(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), digitsX, hourDigitsY, mTextPaintHour);
+                if(calendar.get(Calendar.HOUR_OF_DAY) < 10)
+                    clockCanvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
+
+                // Draw the minute digits
+                clockCanvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
+            }
+
+            // Draw and render the clock bitmap
+            canvas.drawBitmap(clockBitmap, 0, 0, null);
 
             // Invalidate the face for smooth animations if it's visible and not in ambient mode
             if(isVisible() && !isInAmbientMode())
