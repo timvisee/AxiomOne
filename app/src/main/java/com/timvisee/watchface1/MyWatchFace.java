@@ -400,11 +400,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
             updateTime();
 
             // Get the offset for the hour and minute digits
-            int digitsX = (bounds.width() / 2) + (int) resources.getDimension(R.dimen.digit_x_offset);
+            int clockDigitsX = (bounds.width() / 2) + (int) resources.getDimension(R.dimen.digit_x_offset);
             int hourDigitsY = (int) ((bounds.height() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
             int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
 
-            float radius = bounds.width() / 2.0f;
+            // Determine the screen radius
+            float screenRadius = bounds.width() / 2.0f;
+
+            // Determine the precise number of seconds as a float
             float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
 
             // Draw the clock bitmap if it isn't up-to-date
@@ -424,12 +427,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 clockCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
                 // Draw the hour digits and draw a ghost digit if it's only one digit
-                clockCanvas.drawText(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), digitsX, hourDigitsY, mTextPaintHour);
+                clockCanvas.drawText(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), clockDigitsX, hourDigitsY, mTextPaintHour);
                 if(calendar.get(Calendar.HOUR_OF_DAY) < 10)
-                    clockCanvas.drawText("0", digitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
+                    clockCanvas.drawText("0", clockDigitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
 
                 // Draw the minute digits
-                clockCanvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
+                clockCanvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), clockDigitsX, minuteDigitsY, mTextPaintMinute);
 
                 // Update the last bitmap update time
                 clockBitmapLastUpdate = calendar.getTime();
@@ -464,8 +467,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                     // Calculate the coordinates of the tick to draw
                     float[][] pointsTick = {
-                            getCircleCoords(radius - tickLength, angle, radius, radius),
-                            getCircleCoords(radius, angle, radius, radius),
+                            getCircleCoords(screenRadius - tickLength, angle, screenRadius, screenRadius),
+                            getCircleCoords(screenRadius, angle, screenRadius, screenRadius),
                     };
 
                     // Draw the tick
@@ -483,16 +486,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Draw the second gleam
             if(isVisible() && !isInAmbientMode()) {
                 // Calculate some variables for the second gleam
-                float radiusInside = radius - gleamLength;
-                float radiusOutside = radius + 2.0f;
+                float radiusInside = screenRadius - gleamLength;
+                float radiusOutside = screenRadius + 2.0f;
                 float secondAngle = (float) ((secondPrecise - 15.0f) / 60.0f * Math.PI * 2.0f);
 
                 // Create the path of the second gleam
                 float[][] points = {
-                        getCircleCoords(radiusInside, secondAngle - gleamWidth, radius, radius),
-                        getCircleCoords(radiusOutside, secondAngle - gleamWidth, radius, radius),
-                        getCircleCoords(radiusOutside, secondAngle, radius, radius),
-                        getCircleCoords(radiusInside, secondAngle, radius, radius),
+                        getCircleCoords(radiusInside, secondAngle - gleamWidth, screenRadius, screenRadius),
+                        getCircleCoords(radiusOutside, secondAngle - gleamWidth, screenRadius, screenRadius),
+                        getCircleCoords(radiusOutside, secondAngle, screenRadius, screenRadius),
+                        getCircleCoords(radiusInside, secondAngle, screenRadius, screenRadius),
                 };
 
                 // Reset the current path
