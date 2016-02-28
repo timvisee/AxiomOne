@@ -30,13 +30,11 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -48,26 +46,12 @@ import java.util.TimeZone;
  */
 public class MyWatchFace extends CanvasWatchFaceService {
 
-    /**
-     * Handler message id for updating the time periodically in interactive mode.
-     */
-    private static final int MSG_UPDATE_TIME = 0;
-
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
-//    private static class EngineHandler extends Handler {
-//        private final WeakReference<MyWatchFace.Engine> mWeakReference;
-//
-//        public EngineHandler(MyWatchFace.Engine reference) {
-//            mWeakReference = new WeakReference<>(reference);
-//        }
-//    }
-
     private class Engine extends CanvasWatchFaceService.Engine {
-//        final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mTextPaint;
         boolean mAmbient;
@@ -81,8 +65,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 updateTime();
             }
         };
-        float mXOffset;
-        float mYOffset;
 
         /**
          * The text painter for the hour digits.
@@ -201,8 +183,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Set the resources instance
             resources = MyWatchFace.this.getResources();
 
-            mYOffset = resources.getDimension(R.dimen.digital_y_offset);
-
             // Get the background color
             backgroundColor = resources.getColor(R.color.background);
 
@@ -263,7 +243,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
         @Override
         public void onDestroy() {
-//            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
             super.onDestroy();
         }
 
@@ -312,8 +291,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Load resources that have alternate values for round watches.
             Resources resources = MyWatchFace.this.getResources();
             boolean isRound = insets.isRound();
-            mXOffset = resources.getDimension(isRound
-                    ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
             float textSize = resources.getDimension(isRound
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
