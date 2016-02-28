@@ -399,22 +399,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
             // Update the time
             updateTime();
 
-            // Get the offset for the hour and minute digits
-            int clockDigitsX = (bounds.width() / 2) + (int) resources.getDimension(R.dimen.digit_x_offset);
-            int hourDigitsY = (int) ((bounds.height() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
-            int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
-
-            // Determine the screen radius
-            float screenRadius = bounds.width() / 2.0f;
-
-            // Determine the precise number of seconds as a float
-            float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
-
             // Draw the clock bitmap if it isn't up-to-date
             // TODO: Also force-update this when the screen goes to ambient mode!
             if(clockBitmapLastUpdate == null
                     || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
                     || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
+                // Get the offset for the hour and minute digits
+                int clockDigitsX = (bounds.width() / 2) + (int) resources.getDimension(R.dimen.digit_x_offset);
+                int hourDigitsY = (int) ((bounds.height() / 2) - ((mTextPaintHour.descent() + mTextPaintHour.ascent()) / 2));
+                int minuteDigitsY = (int) (hourDigitsY - hourDigitHeight + minuteDigitHeight);
+
                 // Create the clock bitmap if it hasn't been initialized yet
                 if(clockBitmap == null) {
                     clockBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
@@ -438,64 +432,72 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 clockBitmapLastUpdate = calendar.getTime();
             }
 
-            // Draw the clock bitmap if it isn't up-to-date
-            if(isVisible() && !isInAmbientMode() && (ticksBitmapLastUpdate == null || ticksBitmapLastUpdate.getSeconds() != calendar.get(Calendar.SECOND))) {
-                // Create the ticks bitmap if it hasn't been initialized yet
-                if(ticksBitmap == null) {
-                    ticksBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
-                    ticksCanvas = new Canvas(ticksBitmap);
+            // Only draw the following if the screen is on and not in ambient mode
+            if(isVisible() && !isInAmbientMode()) {
+                // Determine the screen radius
+                float screenRadius = bounds.width() / 2.0f;
 
-                } else if(ticksCanvas == null) // Create the canvas if it doesn't exist yet
-                    ticksCanvas = new Canvas(ticksBitmap);
+                // Determine the precise number of seconds as a float
+                float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
 
-                // Clear the current bitmap (transparent)
-                ticksCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                // Draw the clock bitmap if it isn't up-to-date
+                if(ticksBitmapLastUpdate == null || ticksBitmapLastUpdate.getSeconds() != calendar.get(Calendar.SECOND)) {
+                    // Create the ticks bitmap if it hasn't been initialized yet
+                    if(ticksBitmap == null) {
+                        ticksBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+                        ticksCanvas = new Canvas(ticksBitmap);
 
-                // Draw all ticks
-                for(int i = 0; i < 60; i++) {
-                    // Determine whether to draw a large or small tick
-                    boolean largeTick = i % 5 == 0;
+                    } else if(ticksCanvas == null) // Create the canvas if it doesn't exist yet
+                        ticksCanvas = new Canvas(ticksBitmap);
 
-                    // Calculate the angle and the length of the current tick
-                    float angle = (float) ((i - 15.0f) / 60.0f * Math.PI * 2.0f);
-                    float tickLength = largeTick ? tickLengthLarge : tickLengthSmall;
+                    // Clear the current bitmap (transparent)
+                    ticksCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-                    // Select the correct tick paint
-                    Paint tickPaint = largeTick ? mTickLargeFadedPaint : mTickSmallFadedPaint;
-                    if((int) (secondPrecise + 0.5f) % 60 == i)
-                        tickPaint = largeTick ? mTickLargePaint : mTickSmallPaint;
+                    // Draw all ticks
+                    for(int i = 0; i < 60; i++) {
+                        // Determine whether to draw a large or small tick
+                        boolean largeTick = i % 5 == 0;
 
-                    // Calculate the coordinates of the tick to draw
-                    float[][] pointsTick = {
-                            getCircleCoords(screenRadius - tickLength, angle, screenRadius, screenRadius),
-                            getCircleCoords(screenRadius, angle, screenRadius, screenRadius),
-                    };
+                        // Calculate the angle and the length of the current tick
+                        float angle = (float) ((i - 15.0f) / 60.0f * Math.PI * 2.0f);
+                        float tickLength = largeTick ? tickLengthLarge : tickLengthSmall;
 
-                    // Draw the tick
-                    ticksCanvas.drawLine(
-                            pointsTick[0][0], pointsTick[0][1],
-                            pointsTick[1][0], pointsTick[1][1],
-                            tickPaint
-                    );
+                        // Select the correct tick paint
+                        Paint tickPaint = largeTick ? mTickLargeFadedPaint : mTickSmallFadedPaint;
+                        if((int) (secondPrecise + 0.5f) % 60 == i)
+                            tickPaint = largeTick ? mTickLargePaint : mTickSmallPaint;
+
+                        // Calculate the coordinates of the tick to draw
+                        float[][] pointsTick = {
+                                getCircleCoords(screenRadius - tickLength, angle, screenRadius, screenRadius),
+                                getCircleCoords(screenRadius, angle, screenRadius, screenRadius),
+                        };
+
+                        // Draw the tick
+                        ticksCanvas.drawLine(
+                                pointsTick[0][0], pointsTick[0][1],
+                                pointsTick[1][0], pointsTick[1][1],
+                                tickPaint
+                        );
+                    }
+
+                    // Update the last bitmap update time
+                    ticksBitmapLastUpdate = calendar.getTime();
                 }
 
-                // Update the last bitmap update time
-                ticksBitmapLastUpdate = calendar.getTime();
-            }
+                // Calculate the radius for the second gleam
+                float gleamRadiusInside = screenRadius - gleamLength;
+                float gleamRadiusOutside = screenRadius + 2.0f;
 
-            // Draw the second gleam
-            if(isVisible() && !isInAmbientMode()) {
-                // Calculate some variables for the second gleam
-                float radiusInside = screenRadius - gleamLength;
-                float radiusOutside = screenRadius + 2.0f;
+                // Calculate the precise angle for the current second
                 float secondAngle = (float) ((secondPrecise - 15.0f) / 60.0f * Math.PI * 2.0f);
 
                 // Create the path of the second gleam
                 float[][] points = {
-                        getCircleCoords(radiusInside, secondAngle - gleamWidth, screenRadius, screenRadius),
-                        getCircleCoords(radiusOutside, secondAngle - gleamWidth, screenRadius, screenRadius),
-                        getCircleCoords(radiusOutside, secondAngle, screenRadius, screenRadius),
-                        getCircleCoords(radiusInside, secondAngle, screenRadius, screenRadius),
+                        getCircleCoords(gleamRadiusInside, secondAngle - gleamWidth, screenRadius, screenRadius),
+                        getCircleCoords(gleamRadiusOutside, secondAngle - gleamWidth, screenRadius, screenRadius),
+                        getCircleCoords(gleamRadiusOutside, secondAngle, screenRadius, screenRadius),
+                        getCircleCoords(gleamRadiusInside, secondAngle, screenRadius, screenRadius),
                 };
 
                 // Reset the current path
