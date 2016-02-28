@@ -156,10 +156,26 @@ public class MyWatchFace extends CanvasWatchFaceService {
         float tickLengthSmall;
         float tickLengthLarge;
 
+        /**
+         * The bitmap the clock digits are drawn in.
+         * This is only updated when the clock changes.
+         */
         Bitmap clockBitmap;
+
+        /**
+         * The last time the clock bitmap was updated.
+         */
         Date clockBitmapLastUpdate;
 
+        /**
+         * The bitmap the second ticks are drawn in.
+         * This is only updated when the tick visuals change.
+         */
         Bitmap ticksBitmap;
+
+        /**
+         * The last time the ticks bitmap was updated.
+         */
         Date ticksBitmapLastUpdate;
 
 
