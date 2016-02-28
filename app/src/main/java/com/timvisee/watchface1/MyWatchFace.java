@@ -163,6 +163,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Bitmap clockBitmap;
 
         /**
+         * The canvas the clock digits are drawn with.
+         */
+        Canvas clockCanvas;
+
+        /**
          * The last time the clock bitmap was updated.
          */
         Date clockBitmapLastUpdate;
@@ -172,6 +177,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
          * This is only updated when the tick visuals change.
          */
         Bitmap ticksBitmap;
+
+        /**
+         * The canvas the ticks are drawn with.
+         */
+        Canvas ticksCanvas;
 
         /**
          * The last time the ticks bitmap was updated.
@@ -397,24 +407,18 @@ public class MyWatchFace extends CanvasWatchFaceService {
             float radius = bounds.width() / 2.0f;
             float secondPrecise = calendar.get(Calendar.SECOND) + (float) (calendar.get(Calendar.MILLISECOND) % 1000) / 1000.0f;
 
-            // Create the clock bitmap if it hasn't been initialized yet
-            if(clockBitmap == null)
-                clockBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
-
-            // Create the ticks bitmap if it hasn't been initialized yet
-            if(ticksBitmap == null)
-                ticksBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
-
             // Draw the clock bitmap if it isn't up-to-date
             // TODO: Also force-update this when the screen goes to ambient mode!
             if(clockBitmapLastUpdate == null
                     || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
                     || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
-                // Update the last bitmap update time
-                clockBitmapLastUpdate = calendar.getTime();
+                // Create the clock bitmap if it hasn't been initialized yet
+                if(clockBitmap == null) {
+                    clockBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+                    clockCanvas = new Canvas(clockBitmap);
 
-                // Create a new canvas to draw in
-                Canvas clockCanvas = new Canvas(clockBitmap);
+                } else if(clockCanvas == null) // Create the canvas if it doesn't exist yet
+                    clockCanvas = new Canvas(clockBitmap);
 
                 // Clear the current bitmap (transparent)
                 clockCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -426,15 +430,20 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                 // Draw the minute digits
                 clockCanvas.drawText(String.format("%02d", calendar.get(Calendar.MINUTE)), digitsX, minuteDigitsY, mTextPaintMinute);
+
+                // Update the last bitmap update time
+                clockBitmapLastUpdate = calendar.getTime();
             }
 
             // Draw the clock bitmap if it isn't up-to-date
             if(isVisible() && !isInAmbientMode() && (ticksBitmapLastUpdate == null || ticksBitmapLastUpdate.getSeconds() != calendar.get(Calendar.SECOND))) {
-                // Update the last bitmap update time
-                ticksBitmapLastUpdate = calendar.getTime();
+                // Create the ticks bitmap if it hasn't been initialized yet
+                if(ticksBitmap == null) {
+                    ticksBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+                    ticksCanvas = new Canvas(ticksBitmap);
 
-                // Create a new canvas to draw in
-                Canvas ticksCanvas = new Canvas(ticksBitmap);
+                } else if(ticksCanvas == null) // Create the canvas if it doesn't exist yet
+                    ticksCanvas = new Canvas(ticksBitmap);
 
                 // Clear the current bitmap (transparent)
                 ticksCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -466,6 +475,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
                             tickPaint
                     );
                 }
+
+                // Update the last bitmap update time
+                ticksBitmapLastUpdate = calendar.getTime();
             }
 
             // Draw the second gleam
