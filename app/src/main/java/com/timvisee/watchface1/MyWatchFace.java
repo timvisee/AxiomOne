@@ -58,18 +58,17 @@ public class MyWatchFace extends CanvasWatchFaceService {
         return new Engine();
     }
 
-    private static class EngineHandler extends Handler {
-        private final WeakReference<MyWatchFace.Engine> mWeakReference;
-
-        public EngineHandler(MyWatchFace.Engine reference) {
-            mWeakReference = new WeakReference<>(reference);
-        }
-    }
+//    private static class EngineHandler extends Handler {
+//        private final WeakReference<MyWatchFace.Engine> mWeakReference;
+//
+//        public EngineHandler(MyWatchFace.Engine reference) {
+//            mWeakReference = new WeakReference<>(reference);
+//        }
+//    }
 
     private class Engine extends CanvasWatchFaceService.Engine {
-        final Handler mUpdateTimeHandler = new EngineHandler(this);
+//        final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
-        Paint mBackgroundPaint;
         Paint mTextPaint;
         boolean mAmbient;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -264,7 +263,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
         @Override
         public void onDestroy() {
-            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+//            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
             super.onDestroy();
         }
 
@@ -393,6 +392,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
+            // NOTE: This drawing code is fairly complex, to improve the performance as much as
+            //       possible which increases the battery life of the Android Wear devices when the
+            //       watch face is rendered.
+            //       All different elements are only drawn/rendered when their visuals change.
+            //       For example; the time digits are only drawn/rendered once each minute when the
+            //       digits change.
+
             // Draw the background.
             canvas.drawColor(!isInAmbientMode() ? backgroundColor : Color.BLACK);
 
