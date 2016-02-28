@@ -390,6 +390,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 ticksBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
 
             // Draw the clock bitmap if it isn't up-to-date
+            // TODO: Also force-update this when the screen goes to ambient mode!
             if(clockBitmapLastUpdate == null
                     || clockBitmapLastUpdate.getMinutes() != calendar.get(Calendar.MINUTE)
                     || clockBitmapLastUpdate.getHours() != calendar.get(Calendar.HOUR_OF_DAY)) {
@@ -466,10 +467,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                 // Create the path of the second gleam
                 float[][] points = {
-                        getCircleCoords(radiusInside, secondAngle - gleamWidth / 2.0f, radius, radius),
-                        getCircleCoords(radiusOutside, secondAngle - gleamWidth / 2.0f, radius, radius),
-                        getCircleCoords(radiusOutside, secondAngle + gleamWidth / 2.0f, radius, radius),
-                        getCircleCoords(radiusInside, secondAngle + gleamWidth / 2.0f, radius, radius),
+                        getCircleCoords(radiusInside, secondAngle - gleamWidth, radius, radius),
+                        getCircleCoords(radiusOutside, secondAngle - gleamWidth, radius, radius),
+                        getCircleCoords(radiusOutside, secondAngle, radius, radius),
+                        getCircleCoords(radiusInside, secondAngle, radius, radius),
                 };
 
                 // Reset the current path
