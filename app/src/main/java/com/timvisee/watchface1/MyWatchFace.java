@@ -397,9 +397,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 // Update the last bitmap update time
                 clockBitmapLastUpdate = calendar.getTime();
 
-                // Show a debug message
-                System.out.println("Redrawing clock bitmap");
-
                 // Create a new canvas to draw in
                 Canvas clockCanvas = new Canvas(clockBitmap);
 
@@ -419,9 +416,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             if(isVisible() && !isInAmbientMode() && (ticksBitmapLastUpdate == null || ticksBitmapLastUpdate.getSeconds() != calendar.get(Calendar.SECOND))) {
                 // Update the last bitmap update time
                 ticksBitmapLastUpdate = calendar.getTime();
-
-                // Show a debug message
-                System.out.println("Redrawing ticks bitmap");
 
                 // Create a new canvas to draw in
                 Canvas ticksCanvas = new Canvas(ticksBitmap);
