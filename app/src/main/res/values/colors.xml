@@ -7,7 +7,7 @@
     <color name="digit_minute_color">#BABABA</color>
 
     <integer name="digit_alpha_normal">255</integer>
-    <integer name="digit_alpha_ghost">45</integer>
+    <integer name="digit_alpha_ghost">40</integer>
 
     <integer name="gleam_alpha">40</integer>
 

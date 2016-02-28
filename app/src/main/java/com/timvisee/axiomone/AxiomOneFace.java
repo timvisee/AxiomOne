@@ -383,7 +383,7 @@ public class AxiomOneFace extends CanvasWatchFaceService {
 
                 // Draw the hour digits and draw a ghost digit if it's only one digit
                 clockCanvas.drawText(String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)), clockDigitsX, hourDigitsY, mTextPaintHour);
-                if(calendar.get(Calendar.HOUR_OF_DAY) < 10)
+                if(isVisible() && !isInAmbientMode() && calendar.get(Calendar.HOUR_OF_DAY) < 10)
                     clockCanvas.drawText("0", clockDigitsX - hourDigitWidth - hourDigitSpacing, hourDigitsY, mTextPaintHourGhost);
 
                 // Draw the minute digits
