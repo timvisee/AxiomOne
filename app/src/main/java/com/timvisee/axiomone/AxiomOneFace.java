@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.timvisee.axiomone;
 
 import android.content.BroadcastReceiver;
@@ -187,29 +171,28 @@ public class AxiomOneFace extends CanvasWatchFaceService {
             backgroundColor = resources.getColor(R.color.background);
 
             // Create a typeface with the main font, set the font afterwards
-            // TODO: Make a constant of this font name?
-            Typeface font = Typeface.createFromAsset(getAssets(), "fonts/BebasNeue Bold.otf");
+            Typeface font = Typeface.createFromAsset(getAssets(), getString(R.string.font_path));
             mTextPaint = new Paint();
             mTextPaint.setTypeface(font);
             mTextPaint.setColor(resources.getColor(R.color.digital_text));
             mTextPaint.setAntiAlias(true);
 
             // Create the hour and minute text painters
-            // TODO: Set the color and alpha of the font painters!
             mTextPaintHour = new Paint(mTextPaint);
             mTextPaintHour.setColor(resources.getColor(R.color.digit_hour_color));
+            mTextPaintHour.setAlpha(resources.getInteger(R.integer.digit_alpha_normal));
             mTextPaintHour.setTextAlign(Paint.Align.RIGHT);
             mTextPaintHourGhost = new Paint(mTextPaintHour);
-            mTextPaintHourGhost.setAlpha(255 / 10);
+            mTextPaintHourGhost.setAlpha(resources.getInteger(R.integer.digit_alpha_ghost));
             mTextPaintMinute = new Paint(mTextPaint);
             mTextPaintMinute.setColor(resources.getColor(R.color.digit_minute_color));
+            mTextPaintMinute.setAlpha(resources.getInteger(R.integer.digit_alpha_normal));
             mTextPaintMinute.setTextAlign(Paint.Align.LEFT);
 
             // Create the second gleam painter
             mGleamPaint = new Paint();
             mGleamPaint.setColor(Color.WHITE);
-            // TODO: Set the proper alpha here, use a resource constant!
-            mGleamPaint.setAlpha(255 / 5);
+            mGleamPaint.setAlpha(resources.getInteger(R.integer.gleam_alpha));
             mGleamPaint.setStyle(Paint.Style.FILL);
             mGleamPaint.setAntiAlias(true);
 

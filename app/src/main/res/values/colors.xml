@@ -6,6 +6,11 @@
     <color name="digit_hour_color">#FFFFFF</color>
     <color name="digit_minute_color">#BABABA</color>
 
+    <integer name="digit_alpha_normal">255</integer>
+    <integer name="digit_alpha_ghost">25</integer>
+
+    <integer name="gleam_alpha">40</integer>
+
     <color name="tick_color_small">#FFFFFF</color>
     <color name="tick_color_large">#FFFFFF</color>
     <integer name="tick_alpha_small">225</integer>
