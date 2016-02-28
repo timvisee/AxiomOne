@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.timvisee.watchface1">
+    package="com.timvisee.axiomone">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -15,8 +15,8 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
         <service
-            android:name=".MyWatchFace"
-            android:label="@string/my_digital_name"
+            android:name="com.timvisee.axiomone.AxiomOneFace"
+            android:label="@string/face_name"
             android:permission="android.permission.BIND_WALLPAPER">
             <meta-data
                 android:name="android.service.wallpaper"
